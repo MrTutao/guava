@@ -28,11 +28,9 @@ import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * Spliterator utilities for {@code common.collect} internals.
- */
+/** Spliterator utilities for {@code common.collect} internals. */
 @GwtCompatible
 final class CollectSpliterators {
   private CollectSpliterators() {}
@@ -47,7 +45,7 @@ final class CollectSpliterators {
       IntFunction<T> function,
       Comparator<? super T> comparator) {
     if (comparator != null) {
-      checkArgument((extraCharacteristics & (Spliterator.SORTED)) != 0);
+      checkArgument((extraCharacteristics & Spliterator.SORTED) != 0);
     }
     class WithCharacteristics implements Spliterator<T> {
       private final Spliterator.OfInt delegate;
@@ -67,8 +65,7 @@ final class CollectSpliterators {
       }
 
       @Override
-      @Nullable
-      public Spliterator<T> trySplit() {
+      public @Nullable Spliterator<T> trySplit() {
         Spliterator.OfInt split = delegate.trySplit();
         return (split == null) ? null : new WithCharacteristics(split);
       }
@@ -97,7 +94,7 @@ final class CollectSpliterators {
     }
     return new WithCharacteristics(IntStream.range(0, size).spliterator());
   }
-  
+
   /**
    * Returns a {@code Spliterator} over the elements of {@code fromSpliterator} mapped by {@code
    * function}.
@@ -137,7 +134,7 @@ final class CollectSpliterators {
       }
     };
   }
-  
+
   /** Returns a {@code Spliterator} filtered by the specified predicate. */
   static <T> Spliterator<T> filter(Spliterator<T> fromSpliterator, Predicate<? super T> predicate) {
     checkNotNull(fromSpliterator);

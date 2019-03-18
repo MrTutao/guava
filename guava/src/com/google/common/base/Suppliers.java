@@ -14,11 +14,14 @@
 
 package com.google.common.base;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Useful suppliers.
@@ -40,8 +43,6 @@ public final class Suppliers {
    * call {@code supplier} or invoke {@code function} until it is called.
    */
   public static <F, T> Supplier<T> compose(Function<? super F, T> function, Supplier<F> supplier) {
-    Preconditions.checkNotNull(function);
-    Preconditions.checkNotNull(supplier);
     return new SupplierComposition<>(function, supplier);
   }
 
@@ -50,8 +51,8 @@ public final class Suppliers {
     final Supplier<F> supplier;
 
     SupplierComposition(Function<? super F, T> function, Supplier<F> supplier) {
-      this.function = function;
-      this.supplier = supplier;
+      this.function = checkNotNull(function);
+      this.supplier = checkNotNull(supplier);
     }
 
     @Override
@@ -113,10 +114,10 @@ public final class Suppliers {
     transient volatile boolean initialized;
     // "value" does not need to be volatile; visibility piggy-backs
     // on volatile read of "initialized".
-    transient T value;
+    transient @Nullable T value;
 
     MemoizingSupplier(Supplier<T> delegate) {
-      this.delegate = Preconditions.checkNotNull(delegate);
+      this.delegate = checkNotNull(delegate);
     }
 
     @Override
@@ -137,22 +138,24 @@ public final class Suppliers {
 
     @Override
     public String toString() {
-      return "Suppliers.memoize(" + delegate + ")";
+      return "Suppliers.memoize("
+          + (initialized ? "<supplier that returned " + value + ">" : delegate)
+          + ")";
     }
 
     private static final long serialVersionUID = 0;
   }
-  
+
   @VisibleForTesting
   static class NonSerializableMemoizingSupplier<T> implements Supplier<T> {
     volatile Supplier<T> delegate;
     volatile boolean initialized;
     // "value" does not need to be volatile; visibility piggy-backs
     // on volatile read of "initialized".
-    T value;
+    @Nullable T value;
 
     NonSerializableMemoizingSupplier(Supplier<T> delegate) {
-      this.delegate = Preconditions.checkNotNull(delegate);
+      this.delegate = checkNotNull(delegate);
     }
 
     @Override
@@ -175,7 +178,10 @@ public final class Suppliers {
 
     @Override
     public String toString() {
-      return "Suppliers.memoize(" + delegate + ")";
+      Supplier<T> delegate = this.delegate;
+      return "Suppliers.memoize("
+          + (delegate == null ? "<supplier that returned " + value + ">" : delegate)
+          + ")";
     }
   }
 
@@ -200,23 +206,25 @@ public final class Suppliers {
    * @throws IllegalArgumentException if {@code duration} is not positive
    * @since 2.0
    */
+  @SuppressWarnings("GoodTime") // should accept a java.time.Duration
   public static <T> Supplier<T> memoizeWithExpiration(
       Supplier<T> delegate, long duration, TimeUnit unit) {
     return new ExpiringMemoizingSupplier<T>(delegate, duration, unit);
   }
 
   @VisibleForTesting
+  @SuppressWarnings("GoodTime") // lots of violations
   static class ExpiringMemoizingSupplier<T> implements Supplier<T>, Serializable {
     final Supplier<T> delegate;
     final long durationNanos;
-    transient volatile T value;
+    transient volatile @Nullable T value;
     // The special value 0 means "not yet initialized".
     transient volatile long expirationNanos;
 
     ExpiringMemoizingSupplier(Supplier<T> delegate, long duration, TimeUnit unit) {
-      this.delegate = Preconditions.checkNotNull(delegate);
+      this.delegate = checkNotNull(delegate);
       this.durationNanos = unit.toNanos(duration);
-      Preconditions.checkArgument(duration > 0);
+      checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
     }
 
     @Override
@@ -255,15 +263,13 @@ public final class Suppliers {
     private static final long serialVersionUID = 0;
   }
 
-  /**
-   * Returns a supplier that always supplies {@code instance}.
-   */
+  /** Returns a supplier that always supplies {@code instance}. */
   public static <T> Supplier<T> ofInstance(@Nullable T instance) {
     return new SupplierOfInstance<T>(instance);
   }
 
   private static class SupplierOfInstance<T> implements Supplier<T>, Serializable {
-    final T instance;
+    final @Nullable T instance;
 
     SupplierOfInstance(@Nullable T instance) {
       this.instance = instance;
@@ -301,14 +307,14 @@ public final class Suppliers {
    * it, making it thread-safe.
    */
   public static <T> Supplier<T> synchronizedSupplier(Supplier<T> delegate) {
-    return new ThreadSafeSupplier<T>(Preconditions.checkNotNull(delegate));
+    return new ThreadSafeSupplier<T>(delegate);
   }
 
   private static class ThreadSafeSupplier<T> implements Supplier<T>, Serializable {
     final Supplier<T> delegate;
 
     ThreadSafeSupplier(Supplier<T> delegate) {
-      this.delegate = delegate;
+      this.delegate = checkNotNull(delegate);
     }
 
     @Override

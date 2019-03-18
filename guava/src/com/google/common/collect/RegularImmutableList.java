@@ -31,8 +31,7 @@ import java.util.Spliterators;
 class RegularImmutableList<E> extends ImmutableList<E> {
   static final ImmutableList<Object> EMPTY = new RegularImmutableList<>(new Object[0]);
 
-  @VisibleForTesting
-  final transient Object[] array;
+  @VisibleForTesting final transient Object[] array;
 
   RegularImmutableList(Object[] array) {
     this.array = array;
@@ -46,6 +45,21 @@ class RegularImmutableList<E> extends ImmutableList<E> {
   @Override
   boolean isPartialView() {
     return false;
+  }
+
+  @Override
+  Object[] internalArray() {
+    return array;
+  }
+
+  @Override
+  int internalArrayStart() {
+    return 0;
+  }
+
+  @Override
+  int internalArrayEnd() {
+    return array.length;
   }
 
   @Override

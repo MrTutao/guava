@@ -28,17 +28,17 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * An immutable sorted set with one or more elements. TODO(jlevy): Consider
- * separate class for a single-element sorted set.
+ * An immutable sorted set with one or more elements. TODO(jlevy): Consider separate class for a
+ * single-element sorted set.
  *
  * @author Jared Levy
  * @author Louis Wasserman
  */
 @GwtCompatible(serializable = true, emulated = true)
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "rawtypes"})
 final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
   static final RegularImmutableSortedSet<Comparable> NATURAL_EMPTY_SET =
       new RegularImmutableSortedSet<>(ImmutableList.<Comparable>of(), Ordering.natural());
@@ -48,6 +48,21 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
   RegularImmutableSortedSet(ImmutableList<E> elements, Comparator<? super E> comparator) {
     super(comparator);
     this.elements = elements;
+  }
+
+  @Override
+  Object[] internalArray() {
+    return elements.internalArray();
+  }
+
+  @Override
+  int internalArrayStart() {
+    return elements.internalArrayStart();
+  }
+
+  @Override
+  int internalArrayEnd() {
+    return elements.internalArrayEnd();
   }
 
   @Override
@@ -103,14 +118,14 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
      * in O(n) time stepping through the two collections.
      */
     Iterator<E> thisIterator = iterator();
-    
-    Iterator<?> thatIterator = targets.iterator(); 
+
+    Iterator<?> thatIterator = targets.iterator();
     // known nonempty since we checked targets.size() > 1
-    
+
     if (!thisIterator.hasNext()) {
       return false;
     }
-    
+
     Object target = thatIterator.next();
     E current = thisIterator.next();
     try {
