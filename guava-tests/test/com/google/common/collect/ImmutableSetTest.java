@@ -17,6 +17,7 @@
 package com.google.common.collect;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
@@ -536,11 +537,11 @@ public class ImmutableSetTest extends AbstractImmutableSetTest {
 
       double ratio = (double) largeCounter.total() / smallCounter.total();
 
-      assertThat(ratio)
-          .named(
+      assertWithMessage(
               "ratio of equals/hashCode/compareTo operations to build an ImmutableSet via pathway "
                   + "%s of size %s versus size %s",
               pathway, haveSameHashesLarge.size(), haveSameHashesSmall.size())
+          .that(ratio)
           .isAtMost(2.0 * (largeSize * Math.log(largeSize)) / (smallSize * Math.log(smallSize)));
       // We allow up to 2x wobble in the constant factors.
     }
@@ -562,11 +563,11 @@ public class ImmutableSetTest extends AbstractImmutableSetTest {
     int smallSize = haveSameHashesSmall.size();
     int largeSize = haveSameHashesLarge.size();
 
-    assertThat(ratio)
-        .named(
+    assertWithMessage(
             "ratio of equals/hashCode/compareTo operations to worst-case query an ImmutableSet "
                 + "of size %s versus size %s",
             haveSameHashesLarge.size(), haveSameHashesSmall.size())
+        .that(ratio)
         .isAtMost(2 * Math.log(largeSize) / Math.log(smallSize));
     // We allow up to 2x wobble in the constant factors.
   }
@@ -580,5 +581,13 @@ public class ImmutableSetTest extends AbstractImmutableSetTest {
       }
     }
     return worstCalls;
+  }
+
+  public void testReuseBuilderReducingHashTableSizeWithPowerOfTwoTotalElements() {
+    ImmutableSet.Builder<Object> builder = ImmutableSet.builderWithExpectedSize(6);
+    builder.add(0);
+    ImmutableSet<Object> unused = builder.build();
+    ImmutableSet<Object> subject = builder.add(1).add(2).add(3).build();
+    assertFalse(subject.contains(4));
   }
 }

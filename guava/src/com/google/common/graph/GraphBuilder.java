@@ -23,7 +23,8 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 
 /**
- * A builder for constructing instances of {@link MutableGraph} with user-defined properties.
+ * A builder for constructing instances of {@link MutableGraph} or {@link ImmutableGraph} with
+ * user-defined properties.
  *
  * <p>A graph built by this class will have the following properties by default:
  *
@@ -32,13 +33,24 @@ import com.google.common.base.Optional;
  *   <li>orders {@link Graph#nodes()} in the order in which the elements were added
  * </ul>
  *
- * <p>Example of use:
+ * <p>Examples of use:
  *
  * <pre>{@code
+ * // Building a mutable graph
  * MutableGraph<String> graph = GraphBuilder.undirected().allowsSelfLoops(true).build();
  * graph.putEdge("bread", "bread");
  * graph.putEdge("chocolate", "peanut butter");
  * graph.putEdge("peanut butter", "jelly");
+ *
+ * // Building an immutable graph
+ * ImmutableGraph<String> immutableGraph =
+ *     GraphBuilder.undirected()
+ *         .allowsSelfLoops(true)
+ *         .<String>immutable()
+ *         .putEdge("bread", "bread")
+ *         .putEdge("chocolate", "peanut butter")
+ *         .putEdge("peanut butter", "jelly")
+ *         .build();
  * }</pre>
  *
  * @author James Sexton
@@ -80,9 +92,23 @@ public final class GraphBuilder<N> extends AbstractGraphBuilder<N> {
   }
 
   /**
+   * Returns an {@link ImmutableGraph.Builder} with the properties of this {@link GraphBuilder}.
+   *
+   * <p>The returned builder can be used for populating an {@link ImmutableGraph}.
+   *
+   * @since 28.0
+   */
+  public <N1 extends N> ImmutableGraph.Builder<N1> immutable() {
+    GraphBuilder<N1> castBuilder = cast();
+    return new ImmutableGraph.Builder<>(castBuilder);
+  }
+
+  /**
    * Specifies whether the graph will allow self-loops (edges that connect a node to itself).
    * Attempting to add a self-loop to a graph that does not allow them will throw an {@link
    * UnsupportedOperationException}.
+   *
+   * <p>The default value is {@code false}.
    */
   public GraphBuilder<N> allowsSelfLoops(boolean allowsSelfLoops) {
     this.allowsSelfLoops = allowsSelfLoops;
@@ -99,7 +125,11 @@ public final class GraphBuilder<N> extends AbstractGraphBuilder<N> {
     return this;
   }
 
-  /** Specifies the order of iteration for the elements of {@link Graph#nodes()}. */
+  /**
+   * Specifies the order of iteration for the elements of {@link Graph#nodes()}.
+   *
+   * <p>The default value is {@link ElementOrder#insertion() insertion order}.
+   */
   public <N1 extends N> GraphBuilder<N1> nodeOrder(ElementOrder<N1> nodeOrder) {
     GraphBuilder<N1> newBuilder = cast();
     newBuilder.nodeOrder = checkNotNull(nodeOrder);
