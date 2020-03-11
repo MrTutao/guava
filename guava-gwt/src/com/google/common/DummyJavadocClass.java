@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Guava Authors
+ * Copyright (C) 2019 The Guava Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.common.collect;
-public class AbstractHashFloodingTest_gwt extends com.google.gwt.junit.client.GWTTestCase {
-@Override public String getModuleName() {
-  return "com.google.common.collect.testModule";
-}
-}
+
+package com.google.common;
+
+/**
+ * A dummy class so that the Maven Javadoc plugin will produce a jar. If it doesn't produce a jar,
+ * then the Sonatype repository manager issues an error.
+ *
+ * @author Chris Povirk
+ */
+class DummyJavadocClass {}
