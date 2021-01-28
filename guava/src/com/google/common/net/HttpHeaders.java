@@ -28,7 +28,6 @@ import com.google.common.annotations.GwtCompatible;
  *   <li><a href="http://www.ietf.org/rfc/rfc5988.txt">RFC 5988</a>
  * </ul>
  *
- *
  * @author Kurt Alfred Kluever
  * @since 11.0
  */
@@ -133,7 +132,7 @@ public final class HttpHeaders {
    * The HTTP <a href="https://github.com/WICG/origin-isolation">{@code Origin-Isolation}</a> header
    * field name.
    *
-   * @since NEXT
+   * @since 30.1
    */
   public static final String ORIGIN_ISOLATION = "Origin-Isolation";
   /** The HTTP {@code Proxy-Authorization} header field name. */
@@ -421,7 +420,7 @@ public final class HttpHeaders {
   /**
    * The HTTP {@code X-Request-ID} header field name.
    *
-   * @since NEXT
+   * @since 30.1
    */
   public static final String X_REQUEST_ID = "X-Request-ID";
   /** The HTTP {@code X-Requested-With} header field name. */
